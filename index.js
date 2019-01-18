@@ -2,9 +2,169 @@ function log(clog) {
 	console.log(clog);
 }
 
+
+/*	关键点：
+*	typeof instanceof constructor indexOf toString
+*	for..in.. === NaN !== NaN
+* 	JSON.stringify JSON.parse
+*/ 
+var isArray = function(arr) {
+	return arr instanceof Array;
+}
+function forEach(arr, fn) {
+	for(var i = 0, len = arr.length; i < len; i++) {
+		fn(arr[i], i, arr);
+	}
+}
+function find(arr, fn) {
+	var fValue = false;
+	for(var i = 0, len = arr.length; i < len; i++) {
+		if(fn(arr[i], i, arr)) {
+			fValue = arr[i];
+			break;
+		}
+	}
+	return fValue;
+}
+function findIndex(arr, fn) {
+	var fIndex = false;
+	for(var i = 0, len = arr.length; i < len; i++) {
+		if(fn(arr[i], i, arr)) {
+			fIndex = i;
+			break;
+		}
+	}
+	return fIndex;
+}
+function filter(arr, fn) {
+	var filterResult = [];
+	for(var i = 0, len = arr.length; i < len; i++) {
+		if(fn(arr[i], i, arr)) {
+			filterResult.push(arr[i]);
+		}
+	}
+	return filterResult;
+}
+var some = function(arr, fn) {
+	var someTrue = false;
+	for(var i = 0, len = arr.length; i < len; i++) {
+		if(fn(arr[i], i, arr)) {
+			someTrue = true;
+			break;
+		}
+	}
+	return someTrue;
+}
+var every = function(arr, fn) {
+	var everyTrue = true;
+	for(var i = 0, len = arr.length; i < len; i++) {
+		if(!fn(arr[i], i, arr)) {
+			everyTrue = false;
+			break;
+		}
+	}
+	return everyTrue;
+}
+var map = function(arr, fn) {
+	var mapResult = [];
+	for(var i = 0, len = arr.length; i < len; i++) {
+		mapResult.push(fn(arr[i], i, arr));
+	}
+	return mapResult;
+}
+
+var ages = [3, 10, 18, 20];
+// function checkAdult(age) {
+//     return age >= 2 && age < 20;
+// }
+ 
+// forEach(ages, function(v, i) {
+// 	log(i + '==>' + v);
+// })
+// log(find(ages, checkAdult));
+// log(findIndex(ages, checkAdult));
+// log(filter(ages, checkAdult));
+// log(some(ages, checkAdult));
+// log(every(ages, checkAdult));
+// log(map(ages, function(v, i) {
+// 	return v * i;
+// }))
+var keys = function(arrOrObj, fn) {
+	var keysResult = [];
+	if(arrOrObj instanceof Array) {
+		for(var i = 0, len = arrOrObj.length; i < len; i++) {
+			keysResult.push(i);
+		}
+	}else{
+		for(var keys in obj) {
+			keysResult.push(keys);
+		}
+	}
+	return keysResult;
+}
+var values = function(arrOrObj, fn) {
+	var valuesResult = [];
+	if(arrOrObj instanceof Array) {
+		for(var i = 0, len = arrOrObj.length; i < len; i++) {
+			valuesResult.push(arrOrObj[i]);
+		}
+	}else{
+		for(var keys in obj) {
+			valuesResult.push(arrOrObj[keys]);
+		}
+	}
+	return valuesResult;
+}
+var entries = function(arrOrObj, fn) {
+	var entriesResult = [];
+	if(arrOrObj instanceof Array) {
+		for(var i = 0, len = arrOrObj.length; i < len; i++) {
+			entriesResult.push([i, arrOrObj[i]]);
+		}
+	}else{
+		for(var keys in obj) {
+			entriesResult.push([keys, arrOrObj[keys]]);
+		}
+	}
+	
+	return entriesResult;
+}
+var reduce = function(arr, fn, result) {
+	for(var i = 0, len = arr.length; i < len; i++) {
+		fn(result, arr[i]);
+	}
+	return result;
+}
+// var objKeys = function(obj, fn) {
+// 	var objKeysResult = [];
+// 	for(var keys in obj) {
+// 		objKeysResult.push(keys);
+// 	}
+// 	return objKeysResult;
+// }
+// var objValues = function(obj, fn) {
+// 	var objValuesResult = [];
+// 	for(var keys in obj) {
+// 		objValuesResult.push(obj[keys]);
+// 	}
+// 	return objValuesResult;
+// }
+// var objEntries = function(obj, fn) {
+// 	var objEntriesResult = [];
+// 	for(var keys in obj) {
+// 		objEntriesResult.push([keys, obj[keys]]);
+// 	}
+// 	return objEntriesResult;
+// }
+var obj = {a: 'a1', b: 'b1', c: 'c1'};
+
+
 var aObj = {a: 'a'};
 var bObj = {b: 'b'};
 var arr = [aObj, bObj, undefined, null, aObj, bObj, '', ' ','1', 2, undefined, null, 'a', 'b', 1, '2', 2, 'c', 1, 2, 'NaN' ,NaN, NaN, new Date(), [1], [1,2], {a: 'a'}, {b:'b'}];
+
+
+
 
 // 利用indexOf
 function uniq(arr) {
@@ -47,7 +207,6 @@ function uniqBy(arrObj, key) {
 	return uniqResult;
 }
 // log(uniqBy(arrObj, 'id'));
-
 
 
 var objects = [{ 'x': 1.2, 'y': 2 }, { 'x': 2.3, 'y': 1 }, { 'x': 1.8, 'y': 2 }, { 'x': 0.8, 'y': 1 }, { 'x': 1.1, 'y': 2 }];
@@ -233,81 +392,61 @@ function isEqual(e1, e2) {
 // log(isEqual([{a: null}, {b: +0}], [{a: NaN}, {b: -0}]));
 // log(isEqual([{a: null}, {b: +0}], [{a: NaN}, {b: -0}]));
 
-function forEach(arr, fn) {
-	for(var i = 0, len = arr.length; i < len; i++) {
-		fn(arr[i], i, arr);
-	}
+var arrObj = [{id: 1, value: 'a'}, {id: 10, value: 'b'}, {id: 111, value: 'c'}, {id: 21, value: 'd'}, {id: 41, value: 'd'}];
+var kpTimes = 0;
+var sortWith = function(arrObj, key) {
+    if(arrObj.length <= 1) {
+        return arrObj;
+    }
+　　var minIndexVal = arrObj.pop();// 数组的最后一个
+    var leftArr = [];
+    var rightArr = [];
+    for(var i = 0; i < arrObj.length; i++) {
+        if(parseInt(arrObj[i][key]) > parseInt(minIndexVal[key])) {
+            rightArr.push(arrObj[i]);
+        }else{
+            leftArr.push(arrObj[i]);
+        }
+        kpTimes++;
+    }
+    return sortWith(leftArr, key).concat([minIndexVal],sortWith(rightArr, key));
 }
-function find(arr, fn) {
-	var fValue = false;
-	for(var i = 0, len = arr.length; i < len; i++) {
-		if(fn(arr[i], i, arr)) {
-			fValue = arr[i];
-			break;
-		}
-	}
-	return fValue;
-}
-function findIndex(arr, fn) {
-	var fIndex = false;
-	for(var i = 0, len = arr.length; i < len; i++) {
-		if(fn(arr[i], i, arr)) {
-			fIndex = i;
-			break;
-		}
-	}
-	return fIndex;
-}
-function filter(arr, fn) {
-	var filterResult = [];
-	for(var i = 0, len = arr.length; i < len; i++) {
-		if(fn(arr[i], i, arr)) {
-			filterResult.push(arr[i]);
-		}
-	}
-	return filterResult;
-}
-var some = function(arr, fn) {
-	var someTrue = false;
-	for(var i = 0, len = arr.length; i < len; i++) {
-		if(fn(arr[i], i, arr)) {
-			someTrue = true;
-			break;
-		}
-	}
-	return someTrue;
-}
-var every = function(arr, fn) {
-	var everyTrue = true;
-	for(var i = 0, len = arr.length; i < len; i++) {
-		if(!fn(arr[i], i, arr)) {
-			everyTrue = false;
-			break;
-		}
-	}
-	return everyTrue;
-}
-var map = function(arr, fn) {
-	var mapResult = [];
-	for(var i = 0, len = arr.length; i < len; i++) {
-		mapResult.push(fn(arr[i], i, arr));
-	}
-	return mapResult;
-}
+// console.log(sortWith(arrObj, 'id'),kpTimes);
 
-var ages = [3, 10, 18, 20];
-function checkAdult(age) {
-    return age >= 2 && age < 20;
+
+function passwordTest(pw) {
+	var validate = true;
+	if(pw.length < 10) {
+		console.log('密码长度不能小于10位！');
+		validate = false;
+	}else if(!(/[a-z]+/.test(pw) && /[A-Z]+/.test(pw) && /[0-9]+/.test(pw) && /!|@|#|\$|%|\^|&|\*/.test(pw))) {
+		console.log('密码必须包含数字、大小写字母和特殊字符！');
+		validate = false;
+	}
+	return validate;
 }
- 
-// forEach(ages, function(v, i) {
-// 	log(i + '==>' + v);
-// })
-// log(find(ages, checkAdult));
-// log(findIndex(ages, checkAdult));
-// log(filter(ages, checkAdult));
-// log(some(ages, checkAdult));
-// log(every(ages, checkAdult));
-log(map(ages, function(v, i) {
-	return v * i;
-}))
+// console.log(passwordTest('abcabcabcabc1$A'));
+
+
+
+/*
+*	arr：操作的原数组(该方法直接操作原数组，不想操作原数组改用filter方法)
+*	fn：function(value, index) {} ==> 从数组的某个索引开始操作可通过index判断
+*	return: array==> if(origin == false) { return 被remove的对象 } else { return 被remove后的原数组 }
+*/ 
+var remove = function(arr, fn, origin) {
+	var removeResult = [];
+	for(var i = 0; i < arr.length; i++) {
+		if(fn(arr[i], i)) {
+			removeResult.push(arr[i]);
+			arr.splice(i--, 1); // 操作原数组，并且i-1重新循环改位置的判断
+		}
+	}
+	return originArr ? arr : removeResult;
+};
+var arr3 = [1, 11, 2, 2, 4, 6, 6, 7, 8, 9, 0];
+console.log(remove(arr3, function(value, index) {
+	return index > 3 && value % 2 == 0;
+}, true));
+console.log(arr3);
+
