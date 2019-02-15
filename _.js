@@ -6,17 +6,31 @@ var _;
 (function(){
 
 	/*	关键点：
-	*	typeof instanceof constructor indexOf toString
-	*	for..in.. === NaN !== NaN
-	* 	JSON.stringify JSON.parse
+	*	typeof: 结果可以是==>object/undefined/boolean/number/string/function ==> typeof NaN === 'number'/typeof null === 'object'
+	*	instanceof 
+	*	constructor 
+	*	indexOf(ES6使用includes可区分)  不能区分NaN/+0和-0 ==> [NaN].indexOf(NaN) ==> -1、[+0].indexOf(-0) ==> 0、+0 === -0 ==> false
+	* 	toString
+	*	for..in.. 
+	*	=== 
+	*	NaN !== NaN
+	* 	JSON.stringify 
+	*	JSON.parse
+	*   数组循环回调传参的顺序：value、index、arr（和原生的一样），jQ的回调传参顺序为：index、value、arr
 	*/ 
 
 	var isArray = function(arr) {
 		return arr instanceof Array;
 	}
+	/*
+	*	和原生的forEach方法相比增加终止循环功能（通过return false;来终止）
+	*
+	*/ 
 	var forEach = function(arr, fn) {
 		for(var i = 0, len = arr.length; i < len; i++) {
-			fn(arr[i], i, arr);
+			if(fn(arr[i], i, arr) === false) {
+				break;
+			}
 		}
 	}
 	var find = function(arr, fn) {
@@ -51,7 +65,7 @@ var _;
 	/*
 	*	arr：操作的原数组(该方法直接操作原数组，不想操作原数组改用filter方法)
 	*	fn：function(value, index) {} ==> 从数组的某个索引开始操作可通过index判断
-	*	return: array==> if(origin == false) { return 被remove的对象 } else { return 被remove后的原数组 }
+	*	origin: return: array==> if(origin == false) { return 被remove的对象 } else { return 被remove后的原数组 }
 	*/ 
 	var remove = function(arr, fn, origin) {
 		var removeResult = [];
@@ -132,22 +146,46 @@ var _;
 		return entriesResult;
 	}
 
-	var sortWith = function(arrObj, key) {
+
+	var sort = function(arr) {
+	    if(arr.length <= 1) {
+	        return arr;
+	    }
+	　　var minIndexVal = arr.pop();// 数组的最后一个
+		var minIndexValArr = [];
+	    var leftArr = [];
+	    var rightArr = [];
+	    for(var i = 0; i < arr.length; i++) {
+	        if(parseInt(arr[i]) > parseInt(minIndexVal)) {
+	            rightArr.push(arr[i]);
+	        }else if(parseInt(arr[i]) === parseInt(minIndexVal)) {
+	        	minIndexValArr.push(arr[i]);
+	        }else{
+	            leftArr.push(arr[i]);
+	        }
+	    }
+	    minIndexValArr.push(minIndexVal);
+	    return sort(leftArr).concat(minIndexValArr,sort(rightArr));
+	}
+	var sortBy = function(arrObj, key) {
 	    if(arrObj.length <= 1) {
 	        return arrObj;
 	    }
 	　　var minIndexVal = arrObj.pop();// 数组的最后一个
+		var minIndexValArr = [];
 	    var leftArr = [];
 	    var rightArr = [];
 	    for(var i = 0; i < arrObj.length; i++) {
 	        if(parseInt(arrObj[i][key]) > parseInt(minIndexVal[key])) {
 	            rightArr.push(arrObj[i]);
+	        }else if(parseInt(arrObj[i][key]) === parseInt(minIndexVal[key])) {
+	        	minIndexValArr.push(arrObj[i]);
 	        }else{
 	            leftArr.push(arrObj[i]);
 	        }
-	        kpTimes++;
 	    }
-	    return sortWith(leftArr, key).concat([minIndexVal],sortWith(rightArr, key));
+	    minIndexValArr.push(minIndexVal);
+	    return sortBy(leftArr, key).concat(minIndexValArr,sortBy(rightArr, key));
 	}
 
 	/**
@@ -171,10 +209,10 @@ var _;
 			if(e1 !== e1 || e2 !== e2){
 				log('NaN:');
 				return (e1 !== e1 && e2 !== e2);
-			}else if(e1 === null || e2 === null || typeofE1 === 'function' || typeofE2 === 'function'){
+			}else if(e1 === null || e2 === null || e1 === undefined || e2 === undefined || typeofE1 === 'function' || typeofE2 === 'function'){
 				log('null || function:');
 				return false;
-			}else if(typeofE1 === 'object' && typeofE2 === 'object') { // 不存在null, NaN, function，并且两个都是复杂类型
+			}else if(typeofE1 === 'object' && typeofE2 === 'object') { // 不存在null, undefined, NaN, function，并且两个都是复杂类型
 				if(e1 instanceof Array && e2 instanceof Array){
 					if(e1.length !== e2.length || JSON.stringify(e1) !== JSON.stringify(e2)) { // 粗略判断检验
 						log('粗略判断检验:');
@@ -211,7 +249,7 @@ var _;
 					log('非数组、Object、Number、String、Boolean、Date的判断:');
 					return false;
 				}
-			}else{ // 不存在null, NaN, function，并且一个是简单类型，一个是复杂类型
+			}else{ // 不存在null, undefined, NaN, function，并且一个是简单类型，一个是复杂类型
 				var e1isObj = typeof e1 === 'object';
 				var e2isObj = typeof e2 === 'object';
 				var E1, E2;
